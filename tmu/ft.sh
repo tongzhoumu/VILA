@@ -1,17 +1,21 @@
 #!/bin/bash
 
 n_nodes=1
-bs=2
+bs=16
 MODEL_PATH=Efficient-Large-Model/VILA1.5-3b
-OUTPUT=./outputs
-num_gpus_per_node=1
-num_train_epochs=2
-gradient_accumulation_steps=1
-save_steps=1
+num_train_epochs=1
+gradient_accumulation_steps=2
+save_steps=100
 data_mixture=ai2d_train_12k
 
+num_gpus_per_node=4
+gpus=1,2,3,4
 
-torchrun --nnodes=$n_nodes --nproc_per_node=$num_gpus_per_node --master_port=25001 \
+PROJECT_NAME='test_pj'
+EXP_NAME='test_new'
+
+
+WANDB_PROJECT=$PROJECT_NAME CUDA_VISIBLE_DEVICES=$gpus torchrun --nnodes=$n_nodes --nproc_per_node=$num_gpus_per_node --master_port=25001 \
     llava/train/train_mem.py \
     --deepspeed ./scripts/zero3.json \
     --model_name_or_path $MODEL_PATH \
@@ -28,7 +32,7 @@ torchrun --nnodes=$n_nodes --nproc_per_node=$num_gpus_per_node --master_port=250
     --mm_use_im_patch_token False \
     --image_aspect_ratio resize \
     --bf16 True \
-    --output_dir ./checkpoints/$OUTPUT \
+    --output_dir ./checkpoints/$EXP_NAME \
     --num_train_epochs $num_train_epochs \
     --per_device_train_batch_size $bs \
     --per_device_eval_batch_size 4 \
