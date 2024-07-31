@@ -12,5 +12,5 @@ pip install git+https://github.com/huggingface/transformers@v4.36.2
 site_pkg_path=$(python -c 'import site; print(site.getsitepackages()[0])')
 cp -rv ./llava/train/transformers_replace/* $site_pkg_path/transformers/
 
-pip install gdown
+pip install gdown flask
 
