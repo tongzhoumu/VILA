@@ -1,6 +1,5 @@
 from llava.mm_utils import get_model_name_from_path
 
-import torch
 
 from llava.constants import (
     IMAGE_TOKEN_INDEX,
@@ -29,10 +28,11 @@ class LargeModel:
 
         self.model_name = get_model_name_from_path(model_path)
         self.tokenizer, self.model, self.image_processor, context_len = load_pretrained_model(model_path, model_name=self.model_name, model_base=None)
+        # import torch
         # self.tokenizer, self.model, self.image_processor, context_len = load_pretrained_model(model_path, model_name=self.model_name, model_base=None, 
         # load_4bit=True, torch_dtype=torch.float16)
 
-    def predict(self, text_prompt, pil_image):
+    def predict(self, text_prompt, pil_image, max_tokens=512):
         images = [pil_image]
         model = self.model
         model_name = self.model_name
@@ -41,20 +41,6 @@ class LargeModel:
 
 
         qs = text_prompt
-        image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
-        if IMAGE_PLACEHOLDER in qs:
-            if model.config.mm_use_im_start_end:
-                qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
-            else:
-                qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
-        else:
-            if DEFAULT_IMAGE_TOKEN not in qs:
-                print("no <image> tag found in input. Automatically append one at the beginning of text.")
-                # do not repeatively append the prompt.
-                if model.config.mm_use_im_start_end:
-                    qs = (image_token_se + "\n") * len(images) + qs
-                else:
-                    qs = (DEFAULT_IMAGE_TOKEN + "\n") * len(images) + qs
 
         if "llama-2" in model_name.lower():
             conv_mode = "llava_llama_2"
@@ -79,54 +65,32 @@ class LargeModel:
         conv.append_message(conv.roles[1], None)
         prompt = conv.get_prompt()
 
-        # image_sizes = [x.size for x in images]
-        images_tensor = process_images(
-            images,
-            image_processor,
-            model.config
-        ).to(model.device, dtype=torch.float16)
+        input_ids = tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors='pt').unsqueeze(0).cuda()
 
-        input_ids = (
-            tokenizer_image_token(prompt, tokenizer, IMAGE_TOKEN_INDEX, return_tensors="pt")
-            .unsqueeze(0)
-            .cuda()
+        image = pil_image
+        image_tensor = image_processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
+
+        pred = model.generate(
+            input_ids=input_ids.cuda(),
+            images=image_tensor.unsqueeze(0).half().cuda(),
+            do_sample=False,
+            num_beams=1,
+            max_new_tokens=max_tokens,
+            num_return_sequences=1,
+            use_cache=True
         )
 
-        stop_str = conv.sep if conv.sep_style != SeparatorStyle.TWO else conv.sep2
-        keywords = [stop_str]
-        stopping_criteria = KeywordsStoppingCriteria(keywords, tokenizer, input_ids)
+        answer = tokenizer.batch_decode(pred, skip_special_tokens=True)[0]
+        answer = answer.strip()
 
-        temperature = 0
+        return answer
 
-        with torch.inference_mode():
-            output_ids = model.generate(
-                input_ids,
-                images=[
-                    images_tensor,
-                ],
-                do_sample=True if temperature > 0 else False,
-                temperature=temperature,
-                top_p=None,
-                num_beams=1,
-                max_new_tokens=512,
-                use_cache=True,
-                stopping_criteria=[stopping_criteria],
-            )
-
-        outputs = tokenizer.batch_decode(output_ids, skip_special_tokens=True)[0].strip()
-        if outputs.endswith(stop_str):
-            outputs = outputs[: -len(stop_str)]
-        outputs = outputs.strip()
-        return outputs
-
-MODEL_NAME = "VILA1.5-3b"
+# MODEL_NAME = "VILA1.5-3b"
 conv_mode = "vicuna_v1"
-# MODEL_NAME = "Llama-3-VILA1.5-8b"
-# conv_mode = "llama_3"
-# MODEL_NAME = "VILA1.5-13b-AWQ"
-# MODEL_NAME = "VILA1.5-13b"
-# conv_mode = "vicuna_v1"
-model = LargeModel(f"Efficient-Large-Model/{MODEL_NAME}", conv_mode)
+# model_path = 'checkpoints/v1_2_3b_lr_1e-5_bs80_ep_100_tune_all'
+model_path = 'checkpoints/v1_2_13b_lr_3e-5_bs80_ep_100_tune_vision'
+# model_path = 'Efficient-Large-Model/VILA1.5-3b'
+model = LargeModel(model_path, conv_mode)
 
 ########################################################
 
@@ -149,7 +113,7 @@ def chat_completions():
     payload = request.json
     print(f"Received message")
 
-    assert payload["model"] == MODEL_NAME
+    # assert payload["model"] == MODEL_NAME
     msg = payload["messages"][0]
     assert msg['role'] == 'user'
 
@@ -167,6 +131,7 @@ def chat_completions():
     outputs = model.predict(
         text_prompt=text_prompt,
         pil_image=pil_image,
+        max_tokens=payload['max_tokens'],
     )
 
     # Simple mock response

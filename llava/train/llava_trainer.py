@@ -180,6 +180,10 @@ class VILADistributedSampler(DistributedSampler):
 
         indices = list(range(len(self.dataset)))
 
+        # dirty fix from tongzhou
+        random.seed(self.seed + self.epoch)
+        random.shuffle(indices)
+
         indices_list = []
         for i in range(len(self.org_sample_len_list)):
             indices_list.append(

@@ -47,7 +47,9 @@ if __name__ == '__main__':
     disable_torch_init()
     model_path = os.path.expanduser(args.model_path)
     model_name = get_model_name_from_path(model_path)
-    tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_name, args.model_base,)
+    # tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_name, args.model_base,)
+    import torch
+    tokenizer, model, image_processor, context_len = load_pretrained_model(model_path, model_name, args.model_base, load_4bit=True, torch_dtype=torch.float16)
 
     questions = [json.loads(q) for q in open(args.annotation_file, "r")]
     # questions = get_chunk(questions, args.num_chunks, args.chunk_idx)
@@ -63,20 +65,22 @@ if __name__ == '__main__':
         qs_id = line['id']
         image_file = line['image']
         images = [image_file]
-        image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
-        if IMAGE_PLACEHOLDER in qs:
-            if model.config.mm_use_im_start_end:
-                qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
-            else:
-                qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
-        else:
-            if DEFAULT_IMAGE_TOKEN not in qs:
-                print("no <image> tag found in input. Automatically append one at the beginning of text.")
-                # do not repeatively append the prompt.
-                if model.config.mm_use_im_start_end:
-                    qs = (image_token_se + "\n") * len(images) + qs
-                else:
-                    qs = (DEFAULT_IMAGE_TOKEN + "\n") * len(images) + qs
+        # image_token_se = DEFAULT_IM_START_TOKEN + DEFAULT_IMAGE_TOKEN + DEFAULT_IM_END_TOKEN
+        # if IMAGE_PLACEHOLDER in qs:
+        #     if model.config.mm_use_im_start_end:
+        #         qs = re.sub(IMAGE_PLACEHOLDER, image_token_se, qs)
+        #     else:
+        #         qs = re.sub(IMAGE_PLACEHOLDER, DEFAULT_IMAGE_TOKEN, qs)
+        # else:
+        #     if DEFAULT_IMAGE_TOKEN not in qs:
+        #         print("no <image> tag found in input. Automatically append one at the beginning of text.")
+        #         # do not repeatively append the prompt.
+        #         if model.config.mm_use_im_start_end:
+        #             qs = (image_token_se + "\n") * len(images) + qs
+        #         else:
+        #             qs = (DEFAULT_IMAGE_TOKEN + "\n") * len(images) + qs
+
+        # qs = (DEFAULT_IMAGE_TOKEN + "\n") * len(images) + qs
 
         conv = conv_templates[args.conv_mode].copy()
         conv.append_message(conv.roles[0], qs)
@@ -88,18 +92,37 @@ if __name__ == '__main__':
         image = Image.open(os.path.join(args.image_folder, image_file))
         image_tensor = image_processor.preprocess(image, return_tensors='pt')['pixel_values'][0]
 
+
+        # from llava.data.dataset import preprocess_v1
+
+        # sources = [line['conversations']]
+        # inputs = preprocess_v1(sources, tokenizer, has_image=True, no_system_prompt=False)
+        # breakpoint()
+
+        # inputs = {
+        #     'input_ids': input_ids,
+        #     'labels': None,
+        #     'attention_mask': input_ids.ne(tokenizer.pad_token_id).long().cuda(),
+        #     'images': image_tensor.unsqueeze(0).half().cuda(),
+        # }
+        # outputs = model(**inputs)
+        # breakpoint()
+
         pred = model.generate(
             input_ids=input_ids.cuda(),
             images=image_tensor.unsqueeze(0).half().cuda(),
             do_sample=False,
             num_beams=1,
-            max_new_tokens=10,
+            max_new_tokens=512,
             num_return_sequences=1,
             use_cache=True
         )
 
         answer = tokenizer.batch_decode(pred, skip_special_tokens=True)[0]
         answer = answer.strip()
+
+        answer = answer.split('\n')[-1]
+        annotation = annotation.split('\n')[-1]
 
         correct = (answer == annotation)
         cnts[correct] += 1

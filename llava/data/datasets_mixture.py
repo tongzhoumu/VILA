@@ -33,6 +33,151 @@ def add_dataset(dataset):
 
 
 def register_datasets_mixtures():
+    # 1x
+    onex_v0_0 = Dataset(
+        dataset_name='onex_v0_0',
+        dataset_type='torch',
+        data_path='./playground/data/onex_v0_0.jsonl',
+        image_path='./playground/data/onex_v0_0_images'
+    )
+    add_dataset(onex_v0_0)
+
+    onex_restroom_v1_0 = Dataset(
+        dataset_name='onex_restroom_v1_0',
+        dataset_type='torch',
+        data_path='./playground/data/onex_restroom_v1_0_train.jsonl',
+        image_path='./playground/data/onex_restroom_v1_0_images'
+    )
+    add_dataset(onex_restroom_v1_0)
+
+    onex_restroom_v1_1 = Dataset(
+        dataset_name='onex_restroom_v1_1',
+        dataset_type='torch',
+        data_path='./playground/data/onex_restroom_v1_1_train.jsonl',
+        image_path='./playground/data/onex_restroom_v1_1_images'
+    )
+    add_dataset(onex_restroom_v1_1)
+
+    onex_restroom_v1_2 = Dataset(
+        dataset_name='onex_restroom_v1_2',
+        dataset_type='torch',
+        data_path='./playground/data/onex_restroom_v1_2_train.jsonl',
+        image_path='./playground/data/onex_restroom_v1_2_images'
+    )
+    add_dataset(onex_restroom_v1_2)
+
+    onex_restroom_v1_3 = Dataset(
+        dataset_name='onex_restroom_v1_3',
+        dataset_type='torch',
+        data_path='./playground/data/onex_restroom_v1_3_train.jsonl',
+        image_path='./playground/data/onex_restroom_v1_3_images'
+    )
+    add_dataset(onex_restroom_v1_3)
+
+    onex_sbr_paper_v0_0 = Dataset(
+        dataset_name='onex_sbr_paper_v0_0',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v0_0_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v0_0_images'
+    )
+    add_dataset(onex_sbr_paper_v0_0)
+
+    onex_sbr_paper_v0_1 = Dataset(
+        dataset_name='onex_sbr_paper_v0_1',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v0_1_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v0_1_images'
+    )
+    add_dataset(onex_sbr_paper_v0_1)
+
+    onex_sbr_paper_v1_0 = Dataset(
+        dataset_name='onex_sbr_paper_v1_0',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v1_0_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v1_0_images'
+    )
+    add_dataset(onex_sbr_paper_v1_0)
+
+    onex_sbr_paper_v1_1 = Dataset(
+        dataset_name='onex_sbr_paper_v1_1',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v1_1_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v1_1_images'
+    )
+    add_dataset(onex_sbr_paper_v1_1)
+
+    onex_sbr_paper_v2_0 = Dataset(
+        dataset_name='onex_sbr_paper_v2_0',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v2_0_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v2_0_images'
+    )
+    add_dataset(onex_sbr_paper_v2_0)
+
+    onex_sbr_paper_v2_1 = Dataset(
+        dataset_name='onex_sbr_paper_v2_1',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v2_1_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v2_1_images'
+    )
+    add_dataset(onex_sbr_paper_v2_1)
+
+    onex_sbr_paper_v2_2 = Dataset(
+        dataset_name='onex_sbr_paper_v2_2',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v2_2_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v2_2_images'
+    )
+    add_dataset(onex_sbr_paper_v2_2)
+
+    onex_sbr_paper_v2_3 = Dataset(
+        dataset_name='onex_sbr_paper_v2_3',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v2_3_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v2_3_images'
+    )
+    add_dataset(onex_sbr_paper_v2_3)
+
+    onex_sbr_paper_v2_4 = Dataset(
+        dataset_name='onex_sbr_paper_v2_4',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v2_4_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v2_4_images'
+    )
+    add_dataset(onex_sbr_paper_v2_4)
+
+    onex_sbr_paper_v0_2 = Dataset(
+        dataset_name='onex_sbr_paper_v0_2',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v0_2_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v0_2_images'
+    )
+    add_dataset(onex_sbr_paper_v0_2)
+
+    onex_sbr_paper_v3_0 = Dataset(
+        dataset_name='onex_sbr_paper_v3_0',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v3_0_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v3_0_images'
+    )
+    add_dataset(onex_sbr_paper_v3_0)
+
+    onex_sbr_paper_v3_1 = Dataset(
+        dataset_name='onex_sbr_paper_v3_1',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v3_1_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v3_1_images'
+    )
+    add_dataset(onex_sbr_paper_v3_1)
+
+    onex_sbr_paper_v4_0 = Dataset(
+        dataset_name='onex_sbr_paper_v4_0',
+        dataset_type='torch',
+        data_path='./playground/data/onex_sbr_paper_v4_0_train.jsonl',
+        image_path='./playground/data/onex_sbr_paper_v4_0_images'
+    )
+    add_dataset(onex_sbr_paper_v4_0)
+
 
     # Align
     llava_1_5_mm_align = Dataset(
