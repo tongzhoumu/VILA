@@ -164,7 +164,8 @@ def chat_completions():
 
 import time
 import os
-IMAGE_DIR = '/home/tmu/tmu_projects/ros-visual-nav/tmu/data/sbr_online'
+import numpy as np
+IMAGE_DIR = './received_images'
 
 def save_pil_image(pil_img: Image.Image, tag=None):
     filename = f"{time.strftime('%Y%m%d_%H%M%S')}"
@@ -172,6 +173,12 @@ def save_pil_image(pil_img: Image.Image, tag=None):
         filename += f"-{tag}"
     filename += ".png"
     pil_img.save(os.path.join(IMAGE_DIR, filename))
+
+def BGR_to_RGB(pil_img: Image.Image):
+    np_img = np.array(pil_img)
+    np_img = np_img[:, :, ::-1]
+    new_img = Image.fromarray(np_img)
+    return new_img
 
 def generate_question_for_recovery(task, options):
     # Generate question
@@ -189,7 +196,9 @@ def recovery():
     print(f"Received message (recovery)")
 
     pil_image = decode_image(payload['image'])
-    recovery_skills = [
+    pil_image = BGR_to_RGB(pil_image) # a hack
+    
+    options = [
         'Pick up paper',
         'Take paper from machine',
     ]
@@ -197,7 +206,7 @@ def recovery():
 
     text_prompt = generate_question_for_recovery(
         task=task, 
-        options=recovery_skills,
+        options=options,
     )
 
     outputs = model.predict(
@@ -209,7 +218,7 @@ def recovery():
 
     save_pil_image(pil_image, tag=f'pred_{selected_skill.replace(" ", "_")}')
 
-    assert selected_skill in recovery_skills, f"Selected skill {selected_skill} is not in the recovery skills"
+    assert selected_skill in options, f"Selected skill {selected_skill} is not in the recovery skills"
     # Hack
     if selected_skill == 'Take paper from the box':
         selected_skill = 'Proceed to the next skill'
