@@ -93,7 +93,6 @@ class LargeModel:
 conv_mode = "vicuna_v1"
 # restroom door
 # model_path = 'checkpoints/v1_2_3b_lr_1e-5_bs80_ep_100_tune_all'
-# model_path = 'checkpoints/v1_2_13b_lr_3e-5_bs80_ep_100_tune_vision'
 
 # SBR
 # model_path = 'checkpoints/sbr_paper_v0_1_3b_lr_1e-5_bs128_ep_20_tune_all' # all take paper from machine
@@ -230,6 +229,14 @@ def recovery():
     }
 
     return jsonify(response)
+
+@app.route('/hello', methods=['POST'])
+def hello():
+    response = {
+        "hello": "world",
+    }
+    return jsonify(response)
+
 
 
 if __name__ == '__main__':
